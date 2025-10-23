@@ -1,0 +1,423 @@
+//
+//  WeeklyReportView.swift
+//  WAVI
+//
+//  Created by 박현빈 on 10/23/25.
+//
+//
+//  WeeklyReportView.swift
+//  WAVI
+//
+//  Created by 서영채 on 10/12/25.
+//
+
+import SwiftUI
+
+struct WeeklyReportView: View {
+    @Binding var selectedWeek: Int
+    @Binding var currentMonth: Int
+    @Binding var currentYear: Int
+    @State var failureReasons: [String] = []
+    @State var overallSuccessRate: Double = 0.0
+    @State var habitSuccessRates: [(String, Double)] = []
+    
+    // ReportView에서 받은 데이터
+    let reportOverallSuccessRate: Double
+    let reportTopFailureReasons: [TopFailureReason]
+    let reportHabitSuccessRates: [HabitSuccessRate]
+    let reportRecommendations: [ReportRecommendation]
+    
+    init(selectedWeek: Binding<Int>, currentMonth: Binding<Int>, currentYear: Binding<Int>, overallSuccessRate: Double, topFailureReasons: [TopFailureReason], habitSuccessRates: [HabitSuccessRate], recommendations: [ReportRecommendation]) {
+        self._selectedWeek = selectedWeek
+        self._currentMonth = currentMonth
+        self._currentYear = currentYear
+        self.reportOverallSuccessRate = overallSuccessRate
+        self.reportTopFailureReasons = topFailureReasons
+        self.reportHabitSuccessRates = habitSuccessRates
+        self.reportRecommendations = recommendations
+    }
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                // 주간 선택 (동적) - 가로 스크롤
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(Array(weekOptions.enumerated()), id: \.offset) { index, week in
+                            Text(week)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(selectedWeek == index ? .black : .gray)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(selectedWeek == index ? Color.gray.opacity(0.2) : Color.clear)
+                                )
+                                .onTapGesture {
+                                    selectedWeek = index
+                                }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                }
+                
+                // 성공률 섹션
+                weeklySuccessRateSection
+                
+                // 주요 실패 요인 섹션
+                failureFactorsSection
+                
+                // 대체하는 습관 추천 섹션
+                alternativeHabitsSection
+            }
+            .padding(.horizontal, 20)
+        }
+    }
+    
+    // MARK: - Helper Functions
+    private func getIconForHabit(_ name: String) -> String {
+        if name.contains("수영") {
+            return "🏊‍♀️"
+        } else if name.contains("코딩") {
+            return "💻"
+        } else if name.contains("운동") {
+            return "🏃"
+        } else if name.contains("독서") {
+            return "📚"
+        } else {
+            return "⭐"
+        }
+    }
+    
+    private func getIconForFailureReason(_ reason: String) -> String {
+        if reason.contains("피로") {
+            return "😪"
+        } else if reason.contains("약속") {
+            return "👥"
+        } else if reason.contains("기상") {
+            return "😴"
+        } else if reason.contains("시간") {
+            return "⏰"
+        } else {
+            return "😥"
+        }
+    }
+    
+    private func getCurrentHabitName(for recommendation: ReportRecommendation) -> String {
+        // 추천된 습관 이름을 기반으로 현재 습관 이름을 추정
+        // 실제로는 서버에서 현재 습관 정보를 받아와야 함
+        return "현재 습관" // 임시로 설정
+    }
+    
+    private func getCurrentHabitSchedule(for recommendation: ReportRecommendation) -> String {
+        // 추천된 습관 스케줄을 기반으로 현재 습관 스케줄을 추정
+        // 실제로는 서버에서 현재 습관 정보를 받아와야 함
+        return "현재 스케줄" // 임시로 설정
+    }
+    
+    private func formatSchedule(_ startTime: String, _ endTime: String) -> String {
+        let start = formatTime(startTime)
+        let end = formatTime(endTime)
+        return "\(start)-\(end)"
+    }
+    
+    private func formatScheduleWithDays(_ startTime: String, _ endTime: String, _ dayOfWeek: [Int]) -> String {
+        let timeSchedule = formatSchedule(startTime, endTime)
+        let dayNames = ["월", "화", "수", "목", "금", "토", "일"]
+        let dayStrings = dayOfWeek.map { dayNames[$0 - 1] }.joined(separator: "·")
+        return "\(dayStrings) \(timeSchedule)"
+    }
+    
+    private func formatTime(_ timeString: String) -> String {
+        // "09:00:00" -> "09:00" 형태로 변환
+        let components = timeString.components(separatedBy: ":")
+        if components.count >= 2 {
+            return "\(components[0]):\(components[1])"
+        }
+        return timeString
+    }
+    
+    // MARK: - Week Options
+    private var weekOptions: [String] {
+        let calendar = Calendar.current
+        let monthNames = ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"]
+        let monthName = monthNames[currentMonth - 1]
+        
+        // 해당 월의 주 수 계산
+        let dateComponents = DateComponents(year: currentYear, month: currentMonth, day: 1)
+        guard let firstDayOfMonth = calendar.date(from: dateComponents) else { return [] }
+        
+        let range = calendar.range(of: .weekOfMonth, in: .month, for: firstDayOfMonth)
+        let weekCount = range?.count ?? 4
+        
+        var weeks: [String] = []
+        for i in 1...weekCount {
+            let weekNames = ["첫째", "둘째", "셋째", "넷째", "다섯째", "여섯째"]
+            if i <= weekNames.count {
+                weeks.append("\(monthName) \(weekNames[i-1]) 주")
+            }
+        }
+        
+        return weeks
+    }
+    
+    // MARK: - Weekly Success Rate Section
+    private var weeklySuccessRateSection: some View {
+        HStack(spacing: 20) {
+            // 도넛 차트
+            ZStack {
+                Circle()
+                    .stroke(Color.gray.opacity(0.3), style: StrokeStyle(lineWidth: 20, lineCap: .round))
+                    .frame(width: 120, height: 120)
+                
+                Circle()
+                    .trim(from: 0, to: reportOverallSuccessRate / 100.0)
+                    .stroke(Color(red: 66/255, green: 129/255, blue: 182/255), style: StrokeStyle(lineWidth: 20, lineCap: .round))
+                    .frame(width: 120, height: 120)
+                    .rotationEffect(.degrees(-90))
+                
+                VStack(spacing: 4) {
+                    Text("전체 성공률")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.gray)
+                    
+                    Text("\(Int(reportOverallSuccessRate))%")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundColor(.black)
+                }
+            }
+            
+            // 습관별 성공률
+            VStack(alignment: .leading, spacing: 12) {
+                ForEach(Array(reportHabitSuccessRates.enumerated()), id: \.offset) { index, habitRate in
+                    weeklyHabitSuccessItem(icon: getIconForHabit(habitRate.name), title: habitRate.name, rate: "\(Int(habitRate.rate))%")
+                }
+            }
+            
+            Spacer()
+        }
+    }
+    
+    private func weeklyHabitSuccessItem(icon: String, title: String, rate: String) -> some View {
+        HStack(spacing: 8) {
+            Circle()
+                .fill(Color.blue.opacity(0.2))
+                .frame(width: 32, height: 32)
+                .overlay(
+                    Text(icon)
+                        .font(.system(size: 16))
+                )
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.black)
+                
+                Text("\(rate) 성공")
+                    .font(.system(size: 10, weight: .regular))
+                    .foregroundColor(.blue)
+            }
+            
+            Spacer()
+        }
+    }
+    
+    // MARK: - Failure Factors Section
+    private var failureFactorsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("주요 실패 요인")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.black)
+            
+            HStack(spacing: 12) {
+                ForEach(Array(reportTopFailureReasons.enumerated()), id: \.offset) { index, reason in
+                    let rank = "\(index + 1)위"
+                    let icon = getIconForFailureReason(reason.reason)
+                    failureFactorCard(rank: rank, icon: icon, title: reason.reason)
+                }
+            }
+        }
+    }
+    
+    private func failureFactorCard(rank: String, icon: String, title: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            
+            
+            Circle()
+                .fill(Color.gray.opacity(0.2))
+                .frame(width: 30, height: 30)
+                .overlay(
+                    Text(icon)
+                        .font(.system(size: 18))
+                )
+            Text(rank)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundColor(.gray)
+            
+            Text(title)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundColor(.black)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
+        .padding(.horizontal, 2)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color.white)
+                .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+        )
+    }
+    
+    
+    // MARK: - Alternative Habits Section
+    private var alternativeHabitsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // 헤더
+            HStack {
+                Text("습관 변경 추천")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.black)
+                
+                Spacer()
+            }
+            
+            // 추천 습관 카드들
+            VStack(spacing: 16) {
+                ForEach(Array(reportRecommendations.enumerated()), id: \.offset) { index, recommendation in
+                    habitChangeCard(
+                        currentTitle: getCurrentHabitName(for: recommendation),
+                        currentSchedule: getCurrentHabitSchedule(for: recommendation),
+                        currentIcon: getIconForHabit(recommendation.name),
+                        recommendedTitle: recommendation.name,
+                        recommendedSchedule: formatScheduleWithDays(recommendation.startTime, recommendation.endTime, recommendation.dayOfWeek),
+                        recommendedIcon: getIconForHabit(recommendation.name)
+                    )
+                }
+            }
+        }
+    }
+    
+    // MARK: - Habit Change Card
+    private func habitChangeCard(
+        currentTitle: String,
+        currentSchedule: String,
+        currentIcon: String,
+        recommendedTitle: String,
+        recommendedSchedule: String,
+        recommendedIcon: String
+    ) -> some View {
+        VStack(spacing: 12) {
+            // 변경 전 습관
+            HStack(spacing: 12) {
+                // 아이콘
+                Circle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 40, height: 40)
+                    .overlay(
+                        Text(currentIcon)
+                            .font(.system(size: 20))
+                            .foregroundColor(.gray)
+                    )
+                
+                // 습관 정보
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(currentTitle)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.black)
+                    
+                    Text(currentSchedule)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.gray)
+                }
+                
+                Spacer()
+                
+                // 변경 전 라벨
+                Text("변경 전")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.gray)
+            }
+            
+            // 변경 아이콘
+            HStack {
+                Spacer()
+                Circle()
+                    .fill(Color.black)
+                    .frame(width: 32, height: 32)
+                    .overlay(
+                        Image(systemName: "arrow.up.arrow.down")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.white)
+                    )
+                Spacer()
+            }
+            
+            // 변경 후 습관
+            HStack(spacing: 12) {
+                // 아이콘
+                Circle()
+                    .fill(Color(red: 87/255, green: 102/255, blue: 0/255))
+                    .frame(width: 40, height: 40)
+                    .overlay(
+                        Text(recommendedIcon)
+                            .font(.system(size: 20))
+                            .foregroundColor(.white)
+                    )
+                
+                // 습관 정보
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(recommendedTitle)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.black)
+                    
+                    Text(recommendedSchedule)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.gray)
+                }
+                
+                Spacer()
+                
+                // 변경 후 라벨
+                Text("변경 후")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.gray)
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white)
+                .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+        )
+        .onTapGesture {
+            // 습관 변경 적용 시 동작
+            print("습관 변경 적용: \(currentTitle) → \(recommendedTitle)")
+        }
+    }
+}
+
+struct WeeklyReportView_Previews: PreviewProvider {
+    static var previews: some View {
+        WeeklyReportView(
+            selectedWeek: .constant(0),
+            currentMonth: .constant(10),
+            currentYear: .constant(2025),
+            overallSuccessRate: 69.0,
+            topFailureReasons: [
+                TopFailureReason(id: 1, reason: "예상치 못한 피로감", priority: 1),
+                TopFailureReason(id: 2, reason: "친구와의 약속", priority: 2),
+                TopFailureReason(id: 3, reason: "늦어진 기상 시간", priority: 3)
+            ],
+            habitSuccessRates: [
+                HabitSuccessRate(name: "500m 수영하기", rate: 66.0),
+                HabitSuccessRate(name: "코딩 테스트 문제 풀기", rate: 71.0)
+            ],
+            recommendations: [
+                ReportRecommendation(id: 1, name: "300m 수영하기", startTime: "07:00:00", endTime: "07:30:00", dayOfWeek: [1, 3, 5]),
+                ReportRecommendation(id: 2, name: "코딩 테스트 문제 풀기", startTime: "20:00:00", endTime: "21:00:00", dayOfWeek: [1, 2, 3, 4, 5])
+            ]
+        )
+    }
+}
+
