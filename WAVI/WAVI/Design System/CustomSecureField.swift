@@ -39,7 +39,7 @@ struct CustomSecureField: View {
                 .stroke(isFocused ? Color.primaryBlack : Color.primaryBlack.opacity(0.4), lineWidth: 1.5)
                 .background(
                     RoundedRectangle(cornerRadius: 40)
-                        .fill(isFocused ? Color.primaryBlack.opacity(0.01) : Color(.systemBackground))
+                        .fill(Color.primaryBlack.opacity(0.01))
                 )
         )
     }
