@@ -62,6 +62,8 @@ struct RootView: View {
                             AddingHabitsMainView()
                         case .report:
                             ReportView()
+                        case .settings:
+                            SettingView()
                         }
                     }
             }

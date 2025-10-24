@@ -52,16 +52,21 @@ struct MainHeaderView: View {
                                         .frame(width: 30, height: 30)
                                         .foregroundColor(.gray)
                                 )
-                            RoundedRectangle(cornerRadius: 50, style: .continuous)
-                                .fill(Color(hex: "#CDCDD0"))
-                                .frame(width: 30, height: 20)
-                                .overlay(
-                                    Image("equal_main")
-                                        .padding(.vertical, 1)
-                                        .padding(.horizontal, 4),
-                                    alignment: .center
-                                )
-                                .fixedSize()
+                            Button(action: {
+                                path.append(.settings)
+                            }) {
+                                RoundedRectangle(cornerRadius: 50, style: .continuous)
+                                    .fill(Color(hex: "#CDCDD0"))
+                                    .frame(width: 30, height: 20)
+                                    .overlay(
+                                        Image("equal_main")
+                                            .padding(.vertical, 1)
+                                            .padding(.horizontal, 4),
+                                        alignment: .center
+                                    )
+                                    .fixedSize()
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                     .frame(width: 361)
@@ -189,6 +194,8 @@ struct MainHeaderView: View {
                     AddingHabitsMainView()
                 case .report:
                     ReportView()
+                case .settings:
+                    SettingView()
                 default:
                     EmptyView()
                 }

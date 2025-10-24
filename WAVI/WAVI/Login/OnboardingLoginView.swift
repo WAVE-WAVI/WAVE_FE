@@ -145,6 +145,8 @@ private struct PreviewContainer: View {
                         Text("Adding Habits Placeholder")
                     case .report:
                         Text("Report Placeholder")
+                    case .settings:
+                        Text("Settings Placeholder")
                     }
                 }
         }
