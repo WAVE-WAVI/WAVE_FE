@@ -17,13 +17,15 @@ struct MonthlyReportView: View {
     let topFailureReasons: [TopFailureReason]
     let habitSuccessRates: [HabitSuccessRate]
     let recommendations: [ReportRecommendation]
+    let consistencyMessage: String
     
-    init(monthlyCurrentPage: Binding<Int>, overallSuccessRate: Double = 0.0, topFailureReasons: [TopFailureReason] = [], habitSuccessRates: [HabitSuccessRate] = [], recommendations: [ReportRecommendation] = []) {
+    init(monthlyCurrentPage: Binding<Int>, overallSuccessRate: Double = 0.0, topFailureReasons: [TopFailureReason] = [], habitSuccessRates: [HabitSuccessRate] = [], recommendations: [ReportRecommendation] = [], consistencyMessage: String = "") {
         self._monthlyCurrentPage = monthlyCurrentPage
         self.overallSuccessRate = overallSuccessRate
         self.topFailureReasons = topFailureReasons
         self.habitSuccessRates = habitSuccessRates
         self.recommendations = recommendations
+        self.consistencyMessage = consistencyMessage
     }
     
     var body: some View {
@@ -112,7 +114,7 @@ struct MonthlyReportView: View {
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.black)
                 
-                Text("오전 운동도 바쁜 평일 아침에 60%나 성공했다는 건\n 테드님의 의지가 얼마나 강한지 보여줍니다.")
+                Text(consistencyMessage.isEmpty ? "오전 운동도 바쁜 평일 아침에 60%나 성공했다는 건\n 테드님의 의지가 얼마나 강한지 보여줍니다." : consistencyMessage)
                     .font(.system(size: 14, weight: .regular))
                     .foregroundColor(Color(red: 66/255, green: 129/255, blue: 182/255))
                     .lineLimit(nil)
@@ -365,5 +367,5 @@ struct MonthlyReportView: View {
 }
 
 #Preview {
-    MonthlyReportView(monthlyCurrentPage: .constant(0))
+    MonthlyReportView(monthlyCurrentPage: .constant(0), consistencyMessage: "이번 달 꾸준함이 정말 좋아요! 계속 이렇게 유지해보세요! 🔥")
 }
