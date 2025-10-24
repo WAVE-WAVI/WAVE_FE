@@ -51,8 +51,8 @@ struct WeeklyReportView: View {
                                 Text(week)
                                     .font(.system(size: 14, weight: .medium))
                                     .foregroundColor(selectedWeek == index ? .black : .gray)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 6)
+                                    .padding(.horizontal, 12) // 주차 선택 버튼 좌우 여백
+                                    .padding(.vertical, 6) // 주차 선택 버튼 상하 여백
                                     .background(
                                         RoundedRectangle(cornerRadius: 16)
                                             .fill(selectedWeek == index ? Color.gray.opacity(0.2) : Color.clear)
@@ -63,7 +63,7 @@ struct WeeklyReportView: View {
                                     .id(index)
                             }
                         }
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, 20) // 주차 선택 영역 좌우 여백
                     }
                     .onAppear {
                         // 현재 선택된 주차를 센터로 스크롤
@@ -88,7 +88,7 @@ struct WeeklyReportView: View {
                 // 대체하는 습관 추천 섹션
                 alternativeHabitsSection
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 20) // 주간 리포트 뷰 좌우 여백
         }
     }
     
@@ -265,7 +265,7 @@ struct WeeklyReportView: View {
                         .foregroundColor(.gray)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 20)
+                .padding(.vertical, 20) // 데이터 없음 메시지 상하 여백
                 .background(
                     RoundedRectangle(cornerRadius: 12)
                         .fill(Color.gray.opacity(0.1))
@@ -308,8 +308,8 @@ struct WeeklyReportView: View {
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
-        .padding(.horizontal, 2)
+        .padding(.vertical, 16) // 습관 카드 상하 여백
+        .padding(.horizontal, 2) // 습관 카드 좌우 여백
         .background(
             RoundedRectangle(cornerRadius: 14)
                 .fill(Color.white)
@@ -468,7 +468,7 @@ struct WeeklyReportView: View {
                     .foregroundColor(.gray)
             }
         }
-        .padding(16)
+        .padding(16) // 추천 습관 카드 내부 여백
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.white)

@@ -209,8 +209,8 @@ struct ReportView: View {
                 .foregroundColor(.primaryBlack)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 20)
-        .padding(.top, 10)
+        .padding(.horizontal, 20) // 상단 헤더 좌우 여백
+        .padding(.top, 10) // 상단 헤더 상단 여백
     }
     
     // MARK: - Main Card View
@@ -251,15 +251,15 @@ struct ReportView: View {
                         .tag(2)
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-            .padding(.top, 20)
+            .padding(.top, 20) // 월 네비게이션 상단 여백
             
         }
-        .padding(.vertical, 20)
-        .padding(.horizontal, 20)
+        .padding(.vertical, 20) // 메인 카드 상하 여백
+        .padding(.horizontal, 20) // 메인 카드 좌우 여백
         .background(cardBackgroundView)
-        .padding(.horizontal, 20)
-        .padding(.top, 20)
-        .padding(.bottom, selectedTab == 1 ? 0 : 20)
+        .padding(.horizontal, 20) // 메인 카드 외부 좌우 여백
+        .padding(.top, 20) // 메인 카드 상단 여백
+        .padding(.bottom, selectedTab == 1 ? 0 : 20) // 주간 기록일 때만 하단 여백 제거
     }
     
     // MARK: - Month Navigation View
@@ -285,8 +285,8 @@ struct ReportView: View {
                     .foregroundColor(selectedTab == 2 ? .white : .black)
             }
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 20)
+        .padding(.horizontal, 20) // 월 네비게이션 좌우 여백
+        .padding(.top, 20) // 월 네비게이션 상단 여백
     }
     
     // MARK: - Tab Selection View
@@ -316,8 +316,8 @@ struct ReportView: View {
                 }
             }
         }
-        .padding(.horizontal, 4)
-        .padding(.top, 16)
+        .padding(.horizontal, 4) // 탭 선택 뷰 좌우 여백
+        .padding(.top, 16) // 탭 선택 뷰 상단 여백
     }
     
     // MARK: - Week Calendar View
@@ -345,7 +345,7 @@ struct ReportView: View {
                        }
             }
         }
-        .padding(.top, 16)
+        .padding(.top, 16) // 주간 캘린더 상단 여백
         .gesture(
             DragGesture()
                 .onEnded { value in
@@ -376,8 +376,8 @@ struct ReportView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .center)
-        .padding(.horizontal, 20)
-        .padding(.top, 20)
+        .padding(.horizontal, 20) // 월간 페이지 인디케이터 좌우 여백
+        .padding(.top, 20) // 월간 페이지 인디케이터 상단 여백
     }
     
     // MARK: - Card Background View
@@ -421,7 +421,7 @@ struct ReportView: View {
             
             Spacer()
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 20) // 일간 리포트 뷰 좌우 여백
     }
     
     // MARK: - Weekly Report View
@@ -475,7 +475,7 @@ struct ReportView: View {
                         )
                 }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 20) // 습관 목록 섹션 좌우 여백
             }
         }
     }
@@ -519,7 +519,7 @@ struct ReportView: View {
                     habitCardView(habit: habit, index: index)
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 20) // 습관 카드 섹션 좌우 여백
         }
     }
     
@@ -548,7 +548,7 @@ struct ReportView: View {
                     .foregroundColor(.gray)
             }
         }
-        .padding(16)
+        .padding(16) // 개별 습관 카드 내부 여백
         .frame(width: 200)
         .background(
             RoundedRectangle(cornerRadius: 16)

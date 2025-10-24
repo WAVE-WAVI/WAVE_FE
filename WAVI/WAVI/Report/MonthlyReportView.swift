@@ -153,7 +153,7 @@ struct MonthlyReportView: View {
                 Spacer()
             }
         }
-        .padding(16)
+        .padding(16) // 꾸준함 지수 카드 내부 여백
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.white)
@@ -235,8 +235,8 @@ struct MonthlyReportView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 60)
+                .padding(.horizontal, 20) // 첫 번째 페이지 좌우 여백
+                .padding(.top, 60) // 첫 번째 페이지 상단 여백
             }
             
             // 고정된 하단 영역 (꾸준함 지수)
@@ -251,9 +251,9 @@ struct MonthlyReportView: View {
                     .lineLimit(nil)
             }
             .frame(maxWidth: .infinity)
-            .padding(.horizontal, 20)
-            .padding(.top,50)
-            .padding(.bottom, 20)
+            .padding(.horizontal, 20) // 꾸준함 지수 섹션 좌우 여백
+            .padding(.top,50) // 꾸준함 지수 섹션 상단 여백
+            .padding(.bottom, 20) // 꾸준함 지수 섹션 하단 여백
         }
     }
     
@@ -271,8 +271,8 @@ struct MonthlyReportView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 30)
+                .padding(.horizontal, 20) // 두 번째 페이지 좌우 여백
+                .padding(.top, 30) // 두 번째 페이지 상단 여백
             }
             
             // 고정된 하단 영역 (주요 원인 텍스트)
@@ -286,9 +286,9 @@ struct MonthlyReportView: View {
                     .foregroundColor(Color(red: 66/255, green: 129/255, blue: 182/255))
             }
             .frame(maxWidth: .infinity)
-            .padding(.horizontal, 20)
-            .padding(.top, 50)
-            .padding(.bottom, 20)
+            .padding(.horizontal, 20) // 실패 요인 섹션 좌우 여백
+            .padding(.top, 50) // 실패 요인 섹션 상단 여백
+            .padding(.bottom, 20) // 실패 요인 섹션 하단 여백
         }
     }
     
@@ -323,7 +323,7 @@ struct MonthlyReportView: View {
                         .foregroundColor(Color(red: 255/255, green: 165/255, blue: 0/255))
                 }
             }
-            .padding(.top, 30)
+            .padding(.top, 30) // 세 번째 페이지 상단 여백
             
             // 전체 패턴 섹션
             HStack(alignment: .top, spacing: 12) {
@@ -391,8 +391,8 @@ struct MonthlyReportView: View {
             .frame(maxWidth: .infinity)
             .multilineTextAlignment(.center)
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 20)
+        .padding(.horizontal, 20) // 세 번째 페이지 좌우 여백
+        .padding(.vertical, 20) // 세 번째 페이지 상하 여백
     }
     
     
@@ -476,7 +476,7 @@ struct MonthlyReportView: View {
                 .lineLimit(2)
         }
         .frame(width: 130, height: 100)
-        .padding(.horizontal, 12)
+        .padding(.horizontal, 12) // 습관 성공률 카드 좌우 여백
         .background(
             RoundedRectangle(cornerRadius: 14)
                 .fill(Color.white)
