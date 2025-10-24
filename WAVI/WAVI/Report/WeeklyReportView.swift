@@ -214,7 +214,7 @@ struct WeeklyReportView: View {
                     }
                 }
             }
-            .frame(maxHeight: 200) // 최대 높이 제한
+            .frame(maxHeight: 300) // 최대 높이 제한
             
             Spacer()
         }
