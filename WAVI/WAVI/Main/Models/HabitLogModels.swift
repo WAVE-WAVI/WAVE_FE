@@ -44,7 +44,13 @@ struct HabitLogData: Codable {
     let name: String
     let date: String // YYYY-MM-DD 형식
     let completed: Bool
-    let failureReasons: [FailureReason]?
+    let failureReasons: [FailureReasonData]?
+}
+
+// MARK: - 서버에서 오는 실패 이유 데이터
+struct FailureReasonData: Codable {
+    let id: Int
+    let reason: String
 }
 
 // MARK: - 실패 이유 모델

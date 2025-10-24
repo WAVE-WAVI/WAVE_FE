@@ -21,7 +21,7 @@ struct OnboardingLoginEmailView: View {
                         .frame(width: 24, height: 24)
                     
                 }
-                .padding(.trailing, 12)
+                .padding(.trailing, 6)
                 Text("이메일로 계속하기")
                     .font(.system(size: 24, weight: .semibold))
                     .foregroundColor(.black80)
@@ -50,13 +50,13 @@ struct OnboardingLoginEmailView: View {
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.primaryBlack)
+                        .foregroundColor(Color(hex: "#9B9BA1"))
                         .tracking(-0.5)
                     
                     if !vm.email.isEmpty {
                         Button(action: { vm.email = "" }) {
                             Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.primaryBlack)
+                                .foregroundColor(Color(hex: "#9B9BA1"))
                                 .font(.system(size: 16))
                         }
                     }

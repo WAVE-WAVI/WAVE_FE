@@ -111,20 +111,25 @@ struct MainHabitCardView: View {
                 .scaleEffect(isShowingSuccessAnimation ? 1.1 : 1.0)
                 .animation(.easeInOut(duration: 0.3), value: isShowingSuccessAnimation)
             
-            // Success Checkmark Overlay
+            // Success Animation Overlay
             if isShowingSuccessAnimation {
                 ZStack {
-                    Circle()
-                        .fill(Color.green)
-                        .frame(width: 80, height: 80)
+                    // Background circle
+//                    Circle()
+//                        .fill(Color.green)
+//                        .frame(width: 120, height: 120)
+//                        .scaleEffect(isShowingSuccessAnimation ? 1.0 : 0.5)
+//                        .opacity(isShowingSuccessAnimation ? 1.0 : 0.0)
                     
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 40, weight: .bold))
-                        .foregroundColor(.white)
+                    // Privacy & Security Image
+                    Image("Privacy & Security")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 60, height: 60)
+                        .scaleEffect(isShowingSuccessAnimation ? 1.0 : 0.5)
+                        .opacity(isShowingSuccessAnimation ? 1.0 : 0.0)
                 }
-                .scaleEffect(isShowingSuccessAnimation ? 1.0 : 0.5)
-                .opacity(isShowingSuccessAnimation ? 1.0 : 0.0)
-                .animation(.spring(response: 0.6, dampingFraction: 0.6), value: isShowingSuccessAnimation)
+                .animation(.spring(response: 1.0, dampingFraction: 0.8), value: isShowingSuccessAnimation)
             }
             
             // Main Content
@@ -166,7 +171,7 @@ struct MainHabitCardView: View {
                     if isShowingSuccessAnimation {
                         Text("100%")
                             .font(.system(size: 48, weight: .semibold))
-                            .foregroundColor(Color.green)
+                            .foregroundColor(Color(hex: cardColor.textColor))
                             .lineSpacing(0)
                     } else if isShowingFailureAnimation {
                         Text("0%")
@@ -208,8 +213,8 @@ struct MainHabitCardView: View {
         // 성공 애니메이션 시작
         isShowingSuccessAnimation = true
         
-        // 5초 후 애니메이션 완료
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+        // 1초 애니메이션 + 2초 유지 = 총 3초 후 애니메이션 완료
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
             isShowingSuccessAnimation = false
             onSuccess(habit.id)
         }

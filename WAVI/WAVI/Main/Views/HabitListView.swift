@@ -50,6 +50,7 @@ struct HabitListView: View {
                 
         
             }
+            .padding(.top,20)
             .padding(.horizontal, 20)
             
              HStack(spacing: 20) {

@@ -115,6 +115,7 @@ struct AddingHabitsMainView: View {
                 .lineSpacing(4)
                 .foregroundColor(.primaryBlack)
         }
+        .padding(.top,20)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     
