@@ -10,9 +10,22 @@
 		91CA70552E373FFF003E3454 /* WAVI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WAVI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		914E7D482EAB4F22007A304F /* Exceptions for "WAVI" folder in "WAVI" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 91CA70542E373FFE003E3454 /* WAVI */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		91CA70572E373FFF003E3454 /* WAVI */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				914E7D482EAB4F22007A304F /* Exceptions for "WAVI" folder in "WAVI" target */,
+			);
 			path = WAVI;
 			sourceTree = "<group>";
 		};
