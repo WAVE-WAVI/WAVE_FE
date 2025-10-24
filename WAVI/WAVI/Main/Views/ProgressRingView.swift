@@ -77,7 +77,12 @@ struct ProgressRingView: View {
                     )
                     .frame(width: 387, height: 387/2)
                 
-                // 진행률 반원 (421x421)
+                // 진행률 바 위에 점들 배치 (아래 레이어)
+                ProgressDots()
+                    .fill(Color(hex: "#CDCDD0"))
+                    .frame(width: 421, height: 421/2)
+                
+                // 진행률 반원 (421x421) (위 레이어)
                 SemiCircle()
                     .trim(from: 0, to: calculateProgress())
                     .stroke(
@@ -165,6 +170,44 @@ struct SemiCircle: Shape {
     }
 }
 
+// 진행률 바 위에 점들을 배치하는 Shape
+struct ProgressDots: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let center = CGPoint(x: rect.midX, y: rect.maxY)
+        let radius = rect.width / 2
+        
+        // 반원의 가장 위쪽 지점(90도)을 기준으로 좌우로 6도씩 점들을 배치할 각도들을 생성합니다.
+        // 예를 들어, 90도, 90-6=84도, 90+6=96도, 90-12=78도, 90+12=102도 ...
+        // 0도(오른쪽 끝)와 180도(왼쪽 끝)까지 포함합니다.
+        let angles: [Double] = {
+            var result: [Double] = []
+            // 가장 위쪽 점 (90도) 추가
+            result.append(90.0)
+
+            // 90도를 기준으로 좌우 대칭으로 6도씩 각도 추가
+            for angleOffset in stride(from: 6.0, through: 90.0, by: 6.0) {
+                result.append(90.0 - angleOffset) // 오른쪽으로 이동하는 각도 (예: 84, 78, ..., 0)
+                result.append(90.0 + angleOffset) // 왼쪽으로 이동하는 각도 (예: 96, 102, ..., 180)
+            }
+            return result.sorted() // 각도를 오름차순으로 정렬 (필수는 아니지만 일관성을 위해)
+        }()
+        
+        // 점들 그리기
+        for angle in angles {
+            // 반원의 호 위에 점의 위치 계산
+            // center.y (rect.maxY)를 기준으로 위로 그려지는 반원이므로, y 좌표는 감소해야 합니다.
+            // angle은 표준 극좌표계 각도 (0도=오른쪽, 90도=위쪽, 180도=왼쪽)
+            let x = center.x + radius * cos(angle * .pi / 180)
+            let y = center.y - radius * sin(angle * .pi / 180) // 위쪽으로 그려지도록 y 계산 수정
+            
+            path.addEllipse(in: CGRect(x: x - 2, y: y - 2, width: 8, height: 8))
+        }
+        
+        return path
+    }
+}
+
 #Preview {
     let sampleHabits = [
         Habit(id: 1, name: "물 마시기", status: "ACTIVE", dayOfWeek: [1,2,3], icon: "💧", startTime: "09:00:00", endTime: "10:00:00"),
@@ -175,4 +218,7 @@ struct SemiCircle: Shape {
     return ProgressRingView(habits: sampleHabits, currentCenterIndex: 0)
         .previewLayout(.sizeThatFits)
         .padding()
+  
 }
+
+
