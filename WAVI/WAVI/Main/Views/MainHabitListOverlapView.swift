@@ -316,8 +316,8 @@ struct MainHabitListOverlapView: View {
             await viewModel.loadMainData()
         }
         
-        // 4. 5초 후 애니메이션 완료
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+        // 4. 2.5초 후 애니메이션 완료
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
             Task {
                 await MainActor.run {
                     cardAnimationStates[habitId]?.isShowingSuccessAnimation = false

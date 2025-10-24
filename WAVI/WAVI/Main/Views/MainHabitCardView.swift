@@ -213,8 +213,8 @@ struct MainHabitCardView: View {
         // 성공 애니메이션 시작
         isShowingSuccessAnimation = true
         
-        // 1초 애니메이션 + 2초 유지 = 총 3초 후 애니메이션 완료
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+        // 0.5초 애니메이션 + 1초 유지 = 총 1.5초 후 애니메이션 완료
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             isShowingSuccessAnimation = false
             onSuccess(habit.id)
         }
