@@ -45,13 +45,22 @@ struct OnboardingLoginEmailView: View {
             VStack(spacing: 30) {
                 // Email Input
                 HStack {
-                    TextField("E-mail", text: $vm.email)
-                        .keyboardType(.emailAddress)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(Color(hex: "#9B9BA1"))
-                        .tracking(-0.5)
+                    ZStack(alignment: .leading) {
+                        if vm.email.isEmpty {
+                            Text("이메일을 입력하세요")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(Color(hex: "#9B9BA1"))
+                                .tracking(-0.5)
+                        }
+                        
+                        TextField("", text: $vm.email)
+                            .keyboardType(.emailAddress)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.primaryBlack)
+                            .tracking(-0.5)
+                    }
                     
                     if !vm.email.isEmpty {
                         Button(action: { vm.email = "" }) {
@@ -74,10 +83,19 @@ struct OnboardingLoginEmailView: View {
 
                 // Password Input
                 HStack {
-                    SecureField("Password", text: $vm.password)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.primaryBlack)
-                        .tracking(-0.5)
+                    ZStack(alignment: .leading) {
+                        if vm.password.isEmpty {
+                            Text("비밀번호를 입력하세요")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(Color(hex: "#9B9BA1"))
+                                .tracking(-0.5)
+                        }
+                        
+                        SecureField("", text: $vm.password)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.primaryBlack)
+                            .tracking(-0.5)
+                    }
                     
                     if !vm.password.isEmpty {
                         Button(action: { vm.password = "" }) {
