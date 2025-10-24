@@ -1263,15 +1263,21 @@ struct ReportView: View {
     // MARK: - Setup Week Dates
     func setupWeekDates() {
         let calendar = Calendar.current
-        let today = Date()
         
-        // 오늘 날짜가 포함된 주의 시작일(월요일) 찾기
-        let weekday = calendar.component(.weekday, from: today)
+        // 현재 선택된 날짜를 기준으로 주간 날짜 설정
+        let dateComponents = DateComponents(year: currentYear, month: currentMonth, day: currentSelectedDate)
+        guard let selectedDate = calendar.date(from: dateComponents) else {
+            print("❌ 선택된 날짜 생성 실패: \(currentYear)년 \(currentMonth)월 \(currentSelectedDate)일")
+            return
+        }
+        
+        // 선택된 날짜가 포함된 주의 시작일(월요일) 찾기
+        let weekday = calendar.component(.weekday, from: selectedDate)
         // 일요일=1, 월요일=2, 화요일=3, ..., 토요일=7
         // 월요일부터 시작하려면: 월요일=0, 화요일=1, ..., 일요일=6
         let daysFromMonday = (weekday == 1) ? 6 : (weekday - 2)
         
-        let startOfWeek = calendar.date(byAdding: .day, value: -daysFromMonday, to: today) ?? today
+        let startOfWeek = calendar.date(byAdding: .day, value: -daysFromMonday, to: selectedDate) ?? selectedDate
         
         // 일주일치 날짜 생성 (월요일부터 일요일까지)
         var dates: [Int] = []
@@ -1303,7 +1309,7 @@ struct ReportView: View {
         extendedWeekDates = extendedDates
         extendedDays = extendedDayNames
         
-        print("📅 주간 날짜 설정 (월요일부터): \(weekDates)")
+        print("📅 주간 날짜 설정 (월요일부터): \(weekDates) - \(currentYear)년 \(currentMonth)월 \(currentSelectedDate)일 기준")
         print("📅 확장된 날짜 설정: \(extendedWeekDates)")
         print("📅 확장된 요일 설정: \(extendedDays)")
     }
@@ -1323,12 +1329,18 @@ struct ReportView: View {
     
     func updateWeekDates() {
         let calendar = Calendar.current
-        let today = Date()
         
-        // 현재 주의 시작일(월요일) 찾기
-        let weekday = calendar.component(.weekday, from: today)
+        // 현재 선택된 날짜를 기준으로 주간 날짜 업데이트
+        let dateComponents = DateComponents(year: currentYear, month: currentMonth, day: currentSelectedDate)
+        guard let selectedDate = calendar.date(from: dateComponents) else {
+            print("❌ 선택된 날짜 생성 실패: \(currentYear)년 \(currentMonth)월 \(currentSelectedDate)일")
+            return
+        }
+        
+        // 선택된 날짜가 포함된 주의 시작일(월요일) 찾기
+        let weekday = calendar.component(.weekday, from: selectedDate)
         let daysFromMonday = (weekday == 1) ? 6 : (weekday - 2)
-        let startOfCurrentWeek = calendar.date(byAdding: .day, value: -daysFromMonday, to: today) ?? today
+        let startOfCurrentWeek = calendar.date(byAdding: .day, value: -daysFromMonday, to: selectedDate) ?? selectedDate
         
         // 오프셋에 따라 주 이동
         let targetWeekStart = calendar.date(byAdding: .weekOfYear, value: currentWeekOffset, to: startOfCurrentWeek) ?? startOfCurrentWeek
@@ -1358,20 +1370,38 @@ struct ReportView: View {
     // MARK: - Month Navigation
     func moveToPreviousMonth() {
         let calendar = Calendar.current
-        let dateComponents = DateComponents(year: currentYear, month: currentMonth, day: 1)
+        
+        // 현재 선택된 날짜를 유지하면서 이전 월로 이동
+        let dateComponents = DateComponents(year: currentYear, month: currentMonth, day: currentSelectedDate)
         
         if let currentDate = calendar.date(from: dateComponents) {
             if let previousMonth = calendar.date(byAdding: .month, value: -1, to: currentDate) {
                 let newMonth = calendar.component(.month, from: previousMonth)
                 let newYear = calendar.component(.year, from: previousMonth)
+                let newDay = calendar.component(.day, from: previousMonth)
+                
+                // 선택된 날짜가 해당 월에 존재하지 않는 경우 (예: 1월 31일 -> 2월 31일은 없음)
+                // 해당 월의 마지막 날로 조정
+                let adjustedDay = min(currentSelectedDate, newDay)
+                
+                // 만약 조정된 날짜가 원래 선택된 날짜와 다르다면 로그 출력
+                if adjustedDay != currentSelectedDate {
+                    print("⚠️ 날짜 조정: \(currentSelectedDate)일 -> \(adjustedDay)일 (해당 월에 존재하지 않음)")
+                }
                 
                 currentMonth = newMonth
                 currentYear = newYear
+                currentSelectedDate = adjustedDay
                 currentWeekOffset = 0 // 월이 바뀌면 현재 주로 리셋
                 selectedWeek = 0 // 주간 선택도 첫 번째 주로 리셋
                 setupWeekDates()
                 
-                print("📅 이전 달로 이동: \(currentYear)년 \(currentMonth)월")
+                print("📅 이전 달로 이동: \(currentYear)년 \(currentMonth)월 \(currentSelectedDate)일")
+                
+                // 일간 기록 탭일 때 해당 날짜의 데이터 로드
+                if selectedTab == 0 {
+                    loadHabitLogsForDate(selectedDate: currentSelectedDate)
+                }
                 
                 // 월간 데이터 다시 로드
                 if selectedTab == 2 { // 월간 기록 탭일 때만
@@ -1383,20 +1413,38 @@ struct ReportView: View {
     
     func moveToNextMonth() {
         let calendar = Calendar.current
-        let dateComponents = DateComponents(year: currentYear, month: currentMonth, day: 1)
+        
+        // 현재 선택된 날짜를 유지하면서 다음 월로 이동
+        let dateComponents = DateComponents(year: currentYear, month: currentMonth, day: currentSelectedDate)
         
         if let currentDate = calendar.date(from: dateComponents) {
             if let nextMonth = calendar.date(byAdding: .month, value: 1, to: currentDate) {
                 let newMonth = calendar.component(.month, from: nextMonth)
                 let newYear = calendar.component(.year, from: nextMonth)
+                let newDay = calendar.component(.day, from: nextMonth)
+                
+                // 선택된 날짜가 해당 월에 존재하지 않는 경우 (예: 1월 31일 -> 2월 31일은 없음)
+                // 해당 월의 마지막 날로 조정
+                let adjustedDay = min(currentSelectedDate, newDay)
+                
+                // 만약 조정된 날짜가 원래 선택된 날짜와 다르다면 로그 출력
+                if adjustedDay != currentSelectedDate {
+                    print("⚠️ 날짜 조정: \(currentSelectedDate)일 -> \(adjustedDay)일 (해당 월에 존재하지 않음)")
+                }
                 
                 currentMonth = newMonth
                 currentYear = newYear
+                currentSelectedDate = adjustedDay
                 currentWeekOffset = 0 // 월이 바뀌면 현재 주로 리셋
                 selectedWeek = 0 // 주간 선택도 첫 번째 주로 리셋
                 setupWeekDates()
                 
-                print("📅 다음 달로 이동: \(currentYear)년 \(currentMonth)월")
+                print("📅 다음 달로 이동: \(currentYear)년 \(currentMonth)월 \(currentSelectedDate)일")
+                
+                // 일간 기록 탭일 때 해당 날짜의 데이터 로드
+                if selectedTab == 0 {
+                    loadHabitLogsForDate(selectedDate: currentSelectedDate)
+                }
                 
                 // 월간 데이터 다시 로드
                 if selectedTab == 2 { // 월간 기록 탭일 때만
