@@ -25,7 +25,7 @@ struct SelectionCard: View {
         }
         .padding(20)
         .frame(width: width, height: height) // ← 여기서 외부 값 반영
-        .background(Color.white)
+        .background(Color.primaryBlack.opacity(0.01))
         .cornerRadius(10)
         .overlay(
             RoundedRectangle(cornerRadius: 20)
