@@ -70,13 +70,13 @@ struct HabitListView: View {
                      ZStack {
                          RoundedRectangle(cornerRadius: 50)
                              .fill(Color(hex: "#D9D9D9"))
-                             .frame(width: 265.298, height: 40)
+                             .frame(width: 319, height: 40)
                          
                          TextField("습관을 검색하세요", text: $searchText)
                              .font(.custom("Pretendard", size: 20))
-                             .fontWeight(.light)
-                             .foregroundColor(Color(hex: "#040415"))
-                             .padding(.horizontal, 16)
+                             //.fontWeight(.light)
+                             .foregroundColor(Color(hex: "#9B9BA1"))
+                             .padding(.horizontal, 30)
                              .autocapitalization(.none)
                              .disableAutocorrection(true)
                      }
@@ -84,14 +84,14 @@ struct HabitListView: View {
           
                  
                  // 플러스 아이콘 (점선 테두리 원형)
-                 ZStack {
-                     Circle()
-                         .stroke(Color(hex: "#040415"), style: StrokeStyle(lineWidth: 2, dash: [5]))
-                         .frame(width: 40, height: 40)
-                     
-                     Image("plus_black")
-                         .frame(width: 20, height: 20)
-                 }
+//                 ZStack {
+//                     Circle()
+//                         .stroke(Color(hex: "#040415"), style: StrokeStyle(lineWidth: 2, dash: [5]))
+//                         .frame(width: 40, height: 40)
+//                     
+//                     Image("plus_black")
+//                         .frame(width: 20, height: 20)
+//                 }
              }
              .padding(.horizontal, 20)
             
