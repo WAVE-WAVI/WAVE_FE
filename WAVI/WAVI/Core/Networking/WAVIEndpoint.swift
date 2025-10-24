@@ -300,6 +300,13 @@ struct ReportData: Codable {
     let topFailureReasons: [TopFailureReason]?
     let habitSuccessRates: [HabitSuccessRate]?
     let recommendation: [ReportRecommendation]?
+    let consistencyIndex: ConsistencyIndex?
+}
+
+struct ConsistencyIndex: Codable {
+    let id: Int
+    let successRate: Double
+    let displayMessage: String
 }
 
 struct HabitSuccessRate: Codable {

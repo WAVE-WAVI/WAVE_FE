@@ -20,6 +20,7 @@ struct WeeklyReportView: View {
     @State var failureReasons: [String] = []
     @State var overallSuccessRate: Double = 0.0
     @State var habitSuccessRates: [(String, Double)] = []
+    @State var appliedRecommendations: Set<Int> = [] // 적용된 추천 ID들
     
     // ReportView에서 받은 데이터
     let reportOverallSuccessRate: Double
@@ -41,24 +42,39 @@ struct WeeklyReportView: View {
         ScrollView {
             VStack(spacing: 24) {
                 // 주간 선택 (동적) - 가로 스크롤
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        ForEach(Array(weekOptions.enumerated()), id: \.offset) { index, week in
-                            Text(week)
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(selectedWeek == index ? .black : .gray)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .fill(selectedWeek == index ? Color.gray.opacity(0.2) : Color.clear)
-                                )
-                                .onTapGesture {
-                                    selectedWeek = index
-                                }
+                ScrollViewReader { proxy in
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            ForEach(Array(weekOptions.enumerated()), id: \.offset) { index, week in
+                                Text(week)
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(selectedWeek == index ? .black : .gray)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .fill(selectedWeek == index ? Color.gray.opacity(0.2) : Color.clear)
+                                    )
+                                    .onTapGesture {
+                                        selectedWeek = index
+                                    }
+                                    .id(index)
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                    }
+                    .onAppear {
+                        // 현재 선택된 주차를 센터로 스크롤
+                        withAnimation(.easeInOut(duration: 0.5)) {
+                            proxy.scrollTo(selectedWeek, anchor: .center)
                         }
                     }
-                    .padding(.horizontal, 20)
+                    .onChange(of: selectedWeek) { _, newWeek in
+                        // 주차가 변경될 때도 센터로 스크롤
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            proxy.scrollTo(newWeek, anchor: .center)
+                        }
+                    }
                 }
                 
                 // 성공률 섹션
@@ -187,12 +203,15 @@ struct WeeklyReportView: View {
                 }
             }
             
-            // 습관별 성공률
-            VStack(alignment: .leading, spacing: 12) {
-                ForEach(Array(reportHabitSuccessRates.enumerated()), id: \.offset) { index, habitRate in
-                    weeklyHabitSuccessItem(icon: getIconForHabit(habitRate.name), title: habitRate.name, rate: "\(Int(habitRate.rate))%")
+            // 습관별 성공률 (스크롤 가능)
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 12) {
+                    ForEach(Array(reportHabitSuccessRates.enumerated()), id: \.offset) { index, habitRate in
+                        weeklyHabitSuccessItem(icon: getIconForHabit(habitRate.name), title: habitRate.name, rate: "\(Int(habitRate.rate))%")
+                    }
                 }
             }
+            .frame(maxHeight: 200) // 최대 높이 제한
             
             Spacer()
         }
@@ -230,13 +249,18 @@ struct WeeklyReportView: View {
                 .foregroundColor(.black)
             
             HStack(spacing: 12) {
-                ForEach(Array(reportTopFailureReasons.enumerated()), id: \.offset) { index, reason in
+                ForEach(Array(sortedFailureReasons.enumerated()), id: \.offset) { index, reason in
                     let rank = "\(index + 1)위"
                     let icon = getIconForFailureReason(reason.reason)
                     failureFactorCard(rank: rank, icon: icon, title: reason.reason)
                 }
             }
         }
+    }
+    
+    // 실패 요인을 우선순위(priority)로 정렬
+    private var sortedFailureReasons: [TopFailureReason] {
+        return reportTopFailureReasons.sorted { $0.priority < $1.priority }
     }
     
     private func failureFactorCard(rank: String, icon: String, title: String) -> some View {
@@ -286,12 +310,14 @@ struct WeeklyReportView: View {
             VStack(spacing: 16) {
                 ForEach(Array(reportRecommendations.enumerated()), id: \.offset) { index, recommendation in
                     habitChangeCard(
+                        recommendation: recommendation,
                         currentTitle: getCurrentHabitName(for: recommendation),
                         currentSchedule: getCurrentHabitSchedule(for: recommendation),
                         currentIcon: getIconForHabit(recommendation.name),
                         recommendedTitle: recommendation.name,
                         recommendedSchedule: formatScheduleWithDays(recommendation.startTime, recommendation.endTime, recommendation.dayOfWeek),
-                        recommendedIcon: getIconForHabit(recommendation.name)
+                        recommendedIcon: getIconForHabit(recommendation.name),
+                        isApplied: appliedRecommendations.contains(recommendation.id)
                     )
                 }
             }
@@ -300,12 +326,14 @@ struct WeeklyReportView: View {
     
     // MARK: - Habit Change Card
     private func habitChangeCard(
+        recommendation: ReportRecommendation,
         currentTitle: String,
         currentSchedule: String,
         currentIcon: String,
         recommendedTitle: String,
         recommendedSchedule: String,
-        recommendedIcon: String
+        recommendedIcon: String,
+        isApplied: Bool
     ) -> some View {
         VStack(spacing: 12) {
             // 변경 전 습관
@@ -339,17 +367,22 @@ struct WeeklyReportView: View {
                     .foregroundColor(.gray)
             }
             
-            // 변경 아이콘
+            // 변경 아이콘 (스위치 버튼)
             HStack {
                 Spacer()
-                Circle()
-                    .fill(Color.black)
-                    .frame(width: 32, height: 32)
-                    .overlay(
-                        Image(systemName: "arrow.up.arrow.down")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.white)
-                    )
+                Button(action: {
+                    applyHabitChange(recommendation: recommendation)
+                }) {
+                    Circle()
+                        .fill(isApplied ? Color.green : Color.black)
+                        .frame(width: 32, height: 32)
+                        .overlay(
+                            Image(systemName: isApplied ? "checkmark" : "arrow.up.arrow.down")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.white)
+                        )
+                }
+                .buttonStyle(.plain)
                 Spacer()
             }
             
@@ -390,9 +423,21 @@ struct WeeklyReportView: View {
                 .fill(Color.white)
                 .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
         )
-        .onTapGesture {
-            // 습관 변경 적용 시 동작
-            print("습관 변경 적용: \(currentTitle) → \(recommendedTitle)")
+    }
+    
+    // MARK: - Helper Functions
+    private func applyHabitChange(recommendation: ReportRecommendation) {
+        if appliedRecommendations.contains(recommendation.id) {
+            // 이미 적용된 경우 취소
+            appliedRecommendations.remove(recommendation.id)
+            print("❌ 습관 변경 취소: \(recommendation.name)")
+        } else {
+            // 추천 적용
+            appliedRecommendations.insert(recommendation.id)
+            print("✅ 습관 변경 적용: \(recommendation.name)")
+            
+            // TODO: 실제 습관 변경 API 호출
+            // habitService.updateHabit(recommendation)
         }
     }
 }

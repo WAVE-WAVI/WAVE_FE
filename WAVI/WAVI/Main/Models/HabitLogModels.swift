@@ -49,7 +49,7 @@ struct HabitLogData: Codable {
 
 // MARK: - 서버에서 오는 실패 이유 데이터
 struct FailureReasonData: Codable {
-    let id: Int
+    let id: Int?
     let reason: String
 }
 

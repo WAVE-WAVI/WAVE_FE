@@ -24,7 +24,6 @@ struct ProgressRingView: View {
             return habit.remainingTime != "00:00"
         }.count
         
-        print("🔍 전체 습관 개수: \(habits.count), ACTIVE 습관 개수: \(habits.filter { $0.status == "ACTIVE" }.count), 남은 시간 있는 습관 개수: \(remaining)")
         return remaining
     }
     
