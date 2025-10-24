@@ -17,7 +17,11 @@ struct ProfileGenerationView: View {
     let password: String
     
     var body: some View {
-        VStack {
+        ZStack {
+            Color(hex: "#F1EFF2")
+                .ignoresSafeArea()
+            
+            VStack {
             // Custom Navigation Bar
             HStack {
                 Button(action: { dismiss() }) {
@@ -64,13 +68,13 @@ struct ProfileGenerationView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.primaryBlue)
+                    .background(Color(hex: "#040415"))
                     .cornerRadius(30)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 40)
+            }
         }
-        .background(Color(.systemGray6).ignoresSafeArea())
         .navigationBarHidden(true)
     }
 }

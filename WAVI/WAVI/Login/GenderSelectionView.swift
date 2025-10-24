@@ -40,8 +40,11 @@ struct GenderSelectionView: View {
     }
     
     var body: some View {
-      
-        VStack() {
+        ZStack {
+            Color(hex: "#F1EFF2")
+                .ignoresSafeArea()
+            
+            VStack() {
             // 상단 네비게이션
             HStack {
                 Button(action: {
@@ -130,6 +133,7 @@ struct GenderSelectionView: View {
                     maleSelected = false
                     femaleSelected = false
                 }
+            }
             }
         }
     }

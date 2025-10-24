@@ -46,7 +46,11 @@ struct JobSelectionView: View {
     }
     
     var body: some View {
-        VStack{
+        ZStack {
+            Color(hex: "#F1EFF2")
+                .ignoresSafeArea()
+            
+            VStack{
             
             HStack {
                 Button(action: {
@@ -144,6 +148,7 @@ struct JobSelectionView: View {
                     workerSelected = false
                     selfEmployedSelected = false
                 }
+            }
             }
         }
     }
