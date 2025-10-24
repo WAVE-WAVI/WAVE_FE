@@ -62,9 +62,16 @@ class LegacyAPIClient {
             }
         } else {
             // Handle error responses
+            print("❌ HTTP 에러 상태 코드: \(httpResponse.statusCode)")
+            
             if let errorResponse = try? JSONDecoder().decode(APINetworkErrorResponse.self, from: data) {
+                print("❌ 서버 에러 응답: \(errorResponse.message)")
                 throw HTTPError.message(errorResponse.message)
             } else {
+                // 서버 에러 응답을 파싱할 수 없는 경우
+                if let errorString = String(data: data, encoding: .utf8) {
+                    print("❌ 서버 에러 응답 (파싱 실패): \(errorString)")
+                }
                 throw HTTPError.server
             }
         }

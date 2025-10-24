@@ -152,7 +152,7 @@ struct GenderSelectionView: View {
             // 성공 시 다음 화면으로 이동 (나이 입력) - 모든 데이터 전달
             path.append(.ageInput(
                 email: email,
-                code: "123456",
+                code: code,
                 password: password,
                 nickname: nickname,
                 gender: gender

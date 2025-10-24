@@ -342,7 +342,7 @@ struct HabitModifyView: View {
          
          // 실제 습관 수정 API 호출
          print("🚀 습관 수정 API 호출 시작")
-         habitService.createHabit(habitRequest)
+         habitService.updateHabit(id: String(habit.id), request: habitRequest)
              .receive(on: DispatchQueue.main)
              .sink(
                  receiveCompletion: { completion in

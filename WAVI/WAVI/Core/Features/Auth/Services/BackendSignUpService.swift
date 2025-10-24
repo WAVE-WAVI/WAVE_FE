@@ -20,8 +20,19 @@ class BackendSignUpService: SignUpServicing {
         do {
             let response: APISignUpResponse = try await apiClient.request(.initiateSignup, body: request)
             print("✅ 인증 코드 발송 성공: \(response.message)")
+            if let data = response.data {
+                print("📧 인증 코드 데이터: \(data)")
+            }
         } catch let error as HTTPError {
             print("❌ 인증 코드 발송 실패: \(error)")
+            switch error {
+            case .server:
+                print("❌ 서버 에러 - 서버가 응답하지 않거나 내부 오류 발생")
+            case .message(let message):
+                print("❌ 서버 메시지: \(message)")
+            default:
+                print("❌ 기타 네트워크 에러: \(error)")
+            }
             throw error
         } catch {
             print("❌ 알 수 없는 오류: \(error)")
@@ -53,8 +64,19 @@ class BackendSignUpService: SignUpServicing {
         do {
             let response: APISignUpResponse = try await apiClient.request(.completeSignup, body: request)
             print("✅ 회원가입 완료: \(response.message)")
+            if let data = response.data {
+                print("📧 회원가입 데이터: \(data)")
+            }
         } catch let error as HTTPError {
             print("❌ 회원가입 실패: \(error)")
+            switch error {
+            case .server:
+                print("❌ 서버 에러 - 서버가 응답하지 않거나 내부 오류 발생")
+            case .message(let message):
+                print("❌ 서버 메시지: \(message)")
+            default:
+                print("❌ 기타 네트워크 에러: \(error)")
+            }
             throw error
         } catch {
             print("❌ 알 수 없는 오류: \(error)")
