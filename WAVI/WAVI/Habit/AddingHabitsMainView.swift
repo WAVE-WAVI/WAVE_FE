@@ -67,11 +67,13 @@ struct AddingHabitsMainView: View {
                     
                     Spacer()
                     
-                    // 안내 카드들 (입력창 바로 위)
+                    // 안내 카드들 (입력창 바로 위) - 채팅 히스토리가 비어있을 때만 표시
                     if chatHistory.isEmpty {
                         guideCardsView
                             .padding(.horizontal, 20)
                             .padding(.bottom, 16)
+                            .opacity(habitText.isEmpty ? 1.0 : 0.0)
+                            .animation(.easeInOut(duration: 0.3), value: habitText.isEmpty)
                     }
                     
                     // 텍스트 입력 영역
@@ -150,43 +152,37 @@ struct AddingHabitsMainView: View {
     
     // MARK: - Guide Cards View
     private var guideCardsView: some View {
-        HStack(spacing: 12) {
-            // 왼쪽 카드
-            VStack(alignment: .leading, spacing: 4) {
-                Text("새로운 습관을 마음껏 추가해요")
-                    .typography(Typography.Body2)
-                    .foregroundColor(.baseBlack)
-                
-                Text("시작은 간단하게!")
-                    .typography(Typography.Chip)
-                    .foregroundColor(.gray)
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(Array(guideCards.enumerated()), id: \.offset) { index, card in
+                    VStack(alignment: .leading, spacing: 4) {
+                        // 왼쪽 텍스트 (검정색, 위에)
+                        Text(card.0)
+                            .typography(Typography.Body2)
+                            .foregroundColor(.baseBlack)
+                        
+                        // 오른쪽 텍스트 (회색, 아래에)
+                        Text(card.1)
+                            .typography(Typography.Chip)
+                            .foregroundColor(.gray)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.white)
+                            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                    )
+                    .onTapGesture {
+                        // 카드 클릭 시 회색 텍스트를 채팅창에 입력
+                        habitText = card.1
+                    }
+                    .frame(width: 180) // 카드 너비를 조금 줄임
+                }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.white)
-                    .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
-            )
-            
-            // 오른쪽 카드
-            VStack(alignment: .leading, spacing: 4) {
-                Text("아래 예시를 참고하세요")
-                    .typography(Typography.Body2)
-                    .foregroundColor(.baseBlack)
-                
-                Text("ex) \"매일 물 한 잔을 마시고 싶어.\"")
-                    .typography(Typography.Chip)
-                    .foregroundColor(.gray)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.white)
-                    .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
-            )
+            .padding(.horizontal, 20)
         }
+        .frame(height: 60)
         .transition(.opacity.combined(with: .scale))
     }
     
@@ -456,6 +452,15 @@ struct AddingHabitsMainView: View {
     
     // Combine cancellables
     @State private var cancellables = Set<AnyCancellable>()
+    
+    // 가이드 카드 데이터
+    private let guideCards = [
+        ("새로운 습관을 마음껏 추가해요", "매일 물 한 잔을 마시고 싶어."),
+        ("아래 예시를 참고하세요", "하루 10분 스트레칭 하기"),
+        ("작은 목표부터 적어봐요", "매일 15분 걷기"),
+        ("하루 루틴을 만들어보세요", "아침 스트레칭 5분")
+    ]
+    
 }
 
 struct AddingHabitsMainView_Previews: PreviewProvider {
