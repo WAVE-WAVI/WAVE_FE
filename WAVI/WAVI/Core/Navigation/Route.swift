@@ -25,4 +25,7 @@ enum Route: Hashable {
     
     // 리포트 화면
     case report  // 리포트 화면
+    
+    // 설정 화면
+    case settings  // 설정 화면
 }

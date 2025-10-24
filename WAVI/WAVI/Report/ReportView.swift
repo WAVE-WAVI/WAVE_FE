@@ -26,6 +26,7 @@ struct ReportView: View {
     @State var currentMonth = 10
     @State var currentYear = 2025
     @State var currentWeekOffset = 0 // 현재 주의 오프셋 (0 = 현재 주, -1 = 이전 주, 1 = 다음 주)
+    @State var monthlyCurrentPage = 0 // 월간 기록의 현재 페이지
     
     // API 관련 상태
     @State var habitLogs: [HabitLogData] = []
@@ -299,12 +300,12 @@ struct ReportView: View {
             ForEach(0..<3, id: \.self) { index in
                 Rectangle()
                     .fill(
-                        index <= 0 // 현재는 첫 번째 페이지만 활성화
+                        index <= monthlyCurrentPage // 현재 페이지까지 활성화
                             ? Color.white
                             : Color.white.opacity(0.3)
                     )
                     .frame(width: 70, height: 2)
-                    .animation(.easeInOut(duration: 0.3), value: 0)
+                    .animation(.easeInOut(duration: 0.3), value: monthlyCurrentPage)
             }
         }
         .frame(maxWidth: .infinity, alignment: .center)
@@ -372,6 +373,7 @@ struct ReportView: View {
     // MARK: - Monthly Report View
     var monthlyReportView: some View {
         MonthlyReportView(
+            monthlyCurrentPage: $monthlyCurrentPage,
             overallSuccessRate: overallSuccessRate,
             topFailureReasons: topFailureReasons,
             habitSuccessRates: habitSuccessRates,

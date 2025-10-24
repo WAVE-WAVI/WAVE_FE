@@ -10,6 +10,7 @@ import SwiftUI
 
 struct MonthlyReportView: View {
     @State private var currentPage = 0
+    @Binding var monthlyCurrentPage: Int
     
     // ReportView에서 받은 데이터
     let overallSuccessRate: Double
@@ -17,7 +18,8 @@ struct MonthlyReportView: View {
     let habitSuccessRates: [HabitSuccessRate]
     let recommendations: [ReportRecommendation]
     
-    init(overallSuccessRate: Double = 0.0, topFailureReasons: [TopFailureReason] = [], habitSuccessRates: [HabitSuccessRate] = [], recommendations: [ReportRecommendation] = []) {
+    init(monthlyCurrentPage: Binding<Int>, overallSuccessRate: Double = 0.0, topFailureReasons: [TopFailureReason] = [], habitSuccessRates: [HabitSuccessRate] = [], recommendations: [ReportRecommendation] = []) {
+        self._monthlyCurrentPage = monthlyCurrentPage
         self.overallSuccessRate = overallSuccessRate
         self.topFailureReasons = topFailureReasons
         self.habitSuccessRates = habitSuccessRates
@@ -42,6 +44,9 @@ struct MonthlyReportView: View {
             }
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             .frame(height: 600)
+            .onChange(of: currentPage) { _, newPage in
+                monthlyCurrentPage = newPage
+            }
         }
     }
     
@@ -360,5 +365,5 @@ struct MonthlyReportView: View {
 }
 
 #Preview {
-    MonthlyReportView()
+    MonthlyReportView(monthlyCurrentPage: .constant(0))
 }
