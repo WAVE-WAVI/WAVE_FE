@@ -93,6 +93,7 @@ struct WeeklyReportView: View {
     }
     
     // MARK: - Helper Functions
+    
     private func getIconForHabit(_ name: String) -> String {
         if name.contains("수영") {
             return "🏊‍♀️"
@@ -210,7 +211,7 @@ struct WeeklyReportView: View {
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 12) {
                     ForEach(Array(reportHabitSuccessRates.enumerated()), id: \.offset) { index, habitRate in
-                        weeklyHabitSuccessItem(icon: getIconForHabit(habitRate.name), title: habitRate.name, rate: "\(Int(habitRate.rate))%")
+                        weeklyHabitSuccessItem(icon: habitRate.icon, title: habitRate.name, rate: "\(Int(habitRate.rate))%")
                     }
                 }
             }
@@ -251,11 +252,31 @@ struct WeeklyReportView: View {
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.black)
             
-            HStack(spacing: 12) {
-                ForEach(Array(sortedFailureReasons.enumerated()), id: \.offset) { index, reason in
-                    let rank = "\(index + 1)위"
-                    let icon = getIconForFailureReason(reason.reason)
-                    failureFactorCard(rank: rank, icon: icon, title: reason.reason)
+            if sortedFailureReasons.isEmpty {
+                // 데이터가 없을 때 표시할 메시지
+                VStack(spacing: 8) {
+                    Text("📊")
+                        .font(.system(size: 32))
+                    Text("실패 요인 데이터가 없습니다")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.gray)
+                    Text("이번 주에는 실패한 습관이 없었어요!")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.gray)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 20)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.gray.opacity(0.1))
+                )
+            } else {
+                HStack(spacing: 12) {
+                    ForEach(Array(sortedFailureReasons.enumerated()), id: \.offset) { index, reason in
+                        let rank = "\(index + 1)위"
+                        let icon = getIconForFailureReason(reason.reason)
+                        failureFactorCard(rank: rank, icon: icon, title: reason.reason)
+                    }
                 }
             }
         }
@@ -309,19 +330,46 @@ struct WeeklyReportView: View {
                 Spacer()
             }
             
-            // 추천 습관 카드들
-            VStack(spacing: 16) {
-                ForEach(Array(reportRecommendations.enumerated()), id: \.offset) { index, recommendation in
+            if reportRecommendations.isEmpty {
+                // Mock 데이터 표시
+                VStack(spacing: 16) {
                     habitChangeCard(
-                        recommendation: recommendation,
-                        currentTitle: getCurrentHabitName(for: recommendation),
-                        currentSchedule: getCurrentHabitSchedule(for: recommendation),
-                        currentIcon: getIconForHabit(recommendation.name),
-                        recommendedTitle: recommendation.name,
-                        recommendedSchedule: formatScheduleWithDays(recommendation.startTime, recommendation.endTime, recommendation.dayOfWeek),
-                        recommendedIcon: getIconForHabit(recommendation.name),
-                        isApplied: appliedRecommendations.contains(recommendation.id)
+                        recommendation: ReportRecommendation(id: 1, name: "300m 수영하기", startTime: "07:00:00", endTime: "07:30:00", dayOfWeek: [1, 3, 5], currentHabitName: "500m 수영하기", currentHabitStartTime: "07:00:00", currentHabitEndTime: "07:30:00", currentHabitDayOfWeek: [1, 3, 5]),
+                        currentTitle: "500m 수영하기",
+                        currentSchedule: "월·수·금 07:00-07:30",
+                        currentIcon: "🏊‍♀️",
+                        recommendedTitle: "300m 수영하기",
+                        recommendedSchedule: "월·수·금 07:00-07:30",
+                        recommendedIcon: "🏊‍♀️",
+                        isApplied: false
                     )
+                    
+                    habitChangeCard(
+                        recommendation: ReportRecommendation(id: 2, name: "알고리즘 기초 학습", startTime: "20:00:00", endTime: "21:00:00", dayOfWeek: [1, 2, 3, 4, 5], currentHabitName: "코딩 테스트 문제 풀기", currentHabitStartTime: "20:00:00", currentHabitEndTime: "21:00:00", currentHabitDayOfWeek: [1, 2, 3, 4, 5]),
+                        currentTitle: "코딩 테스트 문제 풀기",
+                        currentSchedule: "월·화·수·목·금 20:00-21:00",
+                        currentIcon: "💻",
+                        recommendedTitle: "알고리즘 기초 학습",
+                        recommendedSchedule: "월·화·수·목·금 20:00-21:00",
+                        recommendedIcon: "📚",
+                        isApplied: false
+                    )
+                }
+            } else {
+                // 추천 습관 카드들
+                VStack(spacing: 16) {
+                    ForEach(Array(reportRecommendations.enumerated()), id: \.offset) { index, recommendation in
+                        habitChangeCard(
+                            recommendation: recommendation,
+                            currentTitle: getCurrentHabitName(for: recommendation),
+                            currentSchedule: getCurrentHabitSchedule(for: recommendation),
+                            currentIcon: getIconForHabit(recommendation.name),
+                            recommendedTitle: recommendation.name,
+                            recommendedSchedule: formatScheduleWithDays(recommendation.startTime, recommendation.endTime, recommendation.dayOfWeek),
+                            recommendedIcon: getIconForHabit(recommendation.name),
+                            isApplied: appliedRecommendations.contains(recommendation.id)
+                        )
+                    }
                 }
             }
         }
@@ -489,11 +537,11 @@ struct WeeklyReportView_Previews: PreviewProvider {
                 TopFailureReason(id: 3, reason: "늦어진 기상 시간", priority: 3)
             ],
             habitSuccessRates: [
-                HabitSuccessRate(name: "500m 수영하기", rate: 66.0),
-                HabitSuccessRate(name: "코딩 테스트 문제 풀기", rate: 71.0)
+                HabitSuccessRate(name: "3km 러닝", rate: 66.0, icon: "🏊‍♀️"),
+                HabitSuccessRate(name: "코딩 테스트 3문제 풀기", rate: 71.0, icon: "💻")
             ],
             recommendations: [
-                ReportRecommendation(id: 1, name: "300m 수영하기", startTime: "07:00:00", endTime: "07:30:00", dayOfWeek: [1, 3, 5], currentHabitName: "500m 수영하기", currentHabitStartTime: "07:00:00", currentHabitEndTime: "07:30:00", currentHabitDayOfWeek: [1, 3, 5]),
+                ReportRecommendation(id: 1, name: "1km 러닝", startTime: "07:00:00", endTime: "07:30:00", dayOfWeek: [1, 3, 5], currentHabitName: "3km 러닝", currentHabitStartTime: "07:00:00", currentHabitEndTime: "07:30:00", currentHabitDayOfWeek: [1, 3, 5]),
                 ReportRecommendation(id: 2, name: "코딩 테스트 문제 풀기", startTime: "20:00:00", endTime: "21:00:00", dayOfWeek: [1, 2, 3, 4, 5], currentHabitName: "알고리즘 공부", currentHabitStartTime: "20:00:00", currentHabitEndTime: "21:00:00", currentHabitDayOfWeek: [1, 2, 3, 4, 5])
             ]
         )

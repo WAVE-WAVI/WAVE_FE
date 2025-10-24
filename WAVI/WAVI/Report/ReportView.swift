@@ -169,6 +169,7 @@ struct ReportView: View {
                 monthlyTopFailureReasons = []
                 monthlyHabitSuccessRates = []
                 monthlyRecommendations = []
+                monthlyConsistencyMessage = ""
                 
                 switch newTab {
                 case 0: // 일간기록 탭
@@ -232,24 +233,24 @@ struct ReportView: View {
             }
             
             // 탭뷰로 변경된 하단 섹션 (스크롤 가능)
-            TabView(selection: $selectedTab) {
-                // 하루 기록
+                TabView(selection: $selectedTab) {
+                    // 하루 기록
                 ScrollView {
                     dailyReportView
                 }
-                .tag(0)
-                
-                // 주간 기록
+                        .tag(0)
+                    
+                    // 주간 기록
                 ScrollView {
                     weeklyReportView
                 }
-                .tag(1)
-                
+                        .tag(1)
+                    
                 // 월간 기록 - 스크롤 제한 없음
-                monthlyReportView
-                    .tag(2)
-            }
-            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                    monthlyReportView
+                        .tag(2)
+                }
+                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             .padding(.top, 20)
             
         }
@@ -995,6 +996,7 @@ struct ReportView: View {
         monthlyTopFailureReasons = []
         monthlyHabitSuccessRates = []
         monthlyRecommendations = []
+        monthlyConsistencyMessage = ""
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
@@ -1160,24 +1162,13 @@ struct ReportView: View {
             }
         }
         
-        // API 데이터가 비어있을 경우 테스트용 더미 데이터 추가
+        // API 데이터가 비어있을 경우 로그만 출력 (더미 데이터 추가하지 않음)
         if weeklyTopFailureReasons.isEmpty {
             print("⚠️ 주간 실패 요인 데이터 없음 - API에서 데이터를 받지 못함")
-            print("   → 테스트용 더미 데이터 추가")
-            weeklyTopFailureReasons = [
-                TopFailureReason(id: 1, reason: "피로감으로 인한 실패", priority: 1),
-                TopFailureReason(id: 2, reason: "친구와의 약속", priority: 2),
-                TopFailureReason(id: 3, reason: "늦은 기상", priority: 3)
-            ]
         }
         
         if weeklyRecommendations.isEmpty {
             print("⚠️ 주간 추천 데이터 없음 - API에서 데이터를 받지 못함")
-            print("   → 테스트용 더미 데이터 추가")
-            weeklyRecommendations = [
-                ReportRecommendation(id: 1, name: "운동", startTime: "07:00", endTime: "08:00", dayOfWeek: [1, 2, 3, 4, 5], currentHabitName: "현재 운동", currentHabitStartTime: "07:00", currentHabitEndTime: "08:00", currentHabitDayOfWeek: [1, 2, 3, 4, 5]),
-                ReportRecommendation(id: 2, name: "독서", startTime: "20:00", endTime: "21:00", dayOfWeek: [1, 2, 3, 4, 5], currentHabitName: "현재 독서", currentHabitStartTime: "20:00", currentHabitEndTime: "21:00", currentHabitDayOfWeek: [1, 2, 3, 4, 5])
-            ]
         }
         
         print("✅ 주간 리포트 데이터 처리 완료")
@@ -1258,6 +1249,136 @@ struct ReportView: View {
         print("✅ 월간 리포트 데이터 처리 완료")
         print("   - 실패 요인: \(monthlyTopFailureReasons.count)개")
         print("   - 추천: \(monthlyRecommendations.count)개")
+    }
+    
+    // MARK: - Update Habit Completion Status for Week
+    func updateHabitCompletionStatusForWeek(from logs: [HabitLogData]) {
+        print("🔍 주간 습관 완료 상태 업데이트 시작: \(logs.count)개 로그")
+        
+        // 실패한 습관들의 실패 요인을 수집
+        var failureReasonCounts: [String: Int] = [:]
+        
+        for log in logs {
+            if !log.completed, let failureReasons = log.failureReasons {
+                for failureReason in failureReasons {
+                    let reason = failureReason.reason
+                    failureReasonCounts[reason, default: 0] += 1
+                    print("📊 실패 요인 발견: '\(reason)' (습관: \(log.name), 날짜: \(log.date))")
+                }
+            }
+        }
+        
+        // 실패 요인을 빈도순으로 정렬하고 TopFailureReason 형태로 변환
+        let sortedFailureReasons = failureReasonCounts
+            .sorted { $0.value > $1.value }
+            .enumerated()
+            .map { index, element in
+                TopFailureReason(id: index + 1, reason: element.key, priority: index + 1)
+            }
+        
+        weeklyTopFailureReasons = sortedFailureReasons
+        
+        print("✅ 주간 실패 요인 처리 완료:")
+        print("   - 총 실패 요인 종류: \(sortedFailureReasons.count)개")
+        for (index, reason) in sortedFailureReasons.enumerated() {
+            let count = failureReasonCounts[reason.reason] ?? 0
+            print("   \(index + 1). '\(reason.reason)' - \(count)회 발생")
+        }
+        
+        // 습관별 성공률 계산
+        var habitSuccessRates: [String: (total: Int, completed: Int)] = [:]
+        
+        for log in logs {
+            let habitName = log.name
+            habitSuccessRates[habitName, default: (0, 0)].total += 1
+            if log.completed {
+                habitSuccessRates[habitName, default: (0, 0)].completed += 1
+            }
+        }
+        
+        // HabitSuccessRate 형태로 변환
+        weeklyHabitSuccessRates = habitSuccessRates.map { habitName, counts in
+            let successRate = counts.total > 0 ? Double(counts.completed) / Double(counts.total) * 100.0 : 0.0
+            let icon = getIconForHabitName(habitName)
+            return HabitSuccessRate(name: habitName, rate: successRate, icon: icon)
+        }.sorted { $0.rate > $1.rate }
+        
+        print("✅ 주간 습관 성공률 계산 완료:")
+        for habit in weeklyHabitSuccessRates {
+            print("   - \(habit.name): \(String(format: "%.1f", habit.rate))%")
+        }
+        
+        // 전체 성공률 계산
+        let totalLogs = logs.count
+        let completedLogs = logs.filter { $0.completed }.count
+        weeklySuccessRate = totalLogs > 0 ? Double(completedLogs) / Double(totalLogs) * 100.0 : 0.0
+        
+        print("✅ 주간 전체 성공률: \(String(format: "%.1f", weeklySuccessRate))% (\(completedLogs)/\(totalLogs))")
+    }
+    
+    // MARK: - Update Habit Completion Status for Monthly
+    func updateHabitCompletionStatusForMonthly(from logs: [HabitLogData]) {
+        print("🔍 월간 습관 완료 상태 업데이트 시작: \(logs.count)개 로그")
+        
+        // 실패한 습관들의 실패 요인을 수집
+        var failureReasonCounts: [String: Int] = [:]
+        
+        for log in logs {
+            if !log.completed, let failureReasons = log.failureReasons {
+                for failureReason in failureReasons {
+                    let reason = failureReason.reason
+                    failureReasonCounts[reason, default: 0] += 1
+                    print("📊 실패 요인 발견: '\(reason)' (습관: \(log.name), 날짜: \(log.date))")
+                }
+            }
+        }
+        
+        // 실패 요인을 빈도순으로 정렬하고 TopFailureReason 형태로 변환
+        let sortedFailureReasons = failureReasonCounts
+            .sorted { $0.value > $1.value }
+            .enumerated()
+            .map { index, element in
+                TopFailureReason(id: index + 1, reason: element.key, priority: index + 1)
+            }
+        
+        monthlyTopFailureReasons = sortedFailureReasons
+        
+        print("✅ 월간 실패 요인 처리 완료:")
+        print("   - 총 실패 요인 종류: \(sortedFailureReasons.count)개")
+        for (index, reason) in sortedFailureReasons.enumerated() {
+            let count = failureReasonCounts[reason.reason] ?? 0
+            print("   \(index + 1). '\(reason.reason)' - \(count)회 발생")
+        }
+        
+        // 습관별 성공률 계산
+        var habitSuccessRates: [String: (total: Int, completed: Int)] = [:]
+        
+        for log in logs {
+            let habitName = log.name
+            habitSuccessRates[habitName, default: (0, 0)].total += 1
+            if log.completed {
+                habitSuccessRates[habitName, default: (0, 0)].completed += 1
+            }
+        }
+        
+        // HabitSuccessRate 형태로 변환
+        monthlyHabitSuccessRates = habitSuccessRates.map { habitName, counts in
+            let successRate = counts.total > 0 ? Double(counts.completed) / Double(counts.total) * 100.0 : 0.0
+            let icon = getIconForHabitName(habitName)
+            return HabitSuccessRate(name: habitName, rate: successRate, icon: icon)
+        }.sorted { $0.rate > $1.rate }
+        
+        print("✅ 월간 습관 성공률 계산 완료:")
+        for habit in monthlyHabitSuccessRates {
+            print("   - \(habit.name): \(String(format: "%.1f", habit.rate))%")
+        }
+        
+        // 전체 성공률 계산
+        let totalLogs = logs.count
+        let completedLogs = logs.filter { $0.completed }.count
+        monthlySuccessRate = totalLogs > 0 ? Double(completedLogs) / Double(totalLogs) * 100.0 : 0.0
+        
+        print("✅ 월간 전체 성공률: \(String(format: "%.1f", monthlySuccessRate))% (\(completedLogs)/\(totalLogs))")
     }
     
     // MARK: - Setup Week Dates
@@ -1454,53 +1575,6 @@ struct ReportView: View {
         print("📊 일간 성공률: \(dailySuccessRate)%")
     }
     
-    // MARK: - Weekly Habit Status Update
-    func updateHabitCompletionStatusForWeek(from logs: [HabitLogData]) {
-        print("🔍 주간 습관 로그 업데이트 시작: \(logs.count)개 항목")
-        
-        var habitStatusMap: [Int: (completed: Bool, name: String, icon: String)] = [:]
-        
-        for log in logs {
-            if let existingHabit = habitStatusMap[log.habitId] {
-                habitStatusMap[log.habitId] = (completed: log.completed, name: existingHabit.name, icon: existingHabit.icon)
-            } else {
-                habitStatusMap[log.habitId] = (completed: log.completed, name: log.name, icon: getIconForHabitName(log.name))
-            }
-            print("📝 주간 습관 \(log.habitId) (\(log.name)): \(log.completed ? "완료" : "미완료")")
-        }
-        
-        let sortedHabits = habitStatusMap.sorted { $0.key < $1.key }
-        actualHabits = sortedHabits.map { (habitId, habitData) in
-            return (id: habitId, name: habitData.name, icon: habitData.icon, completed: habitData.completed)
-        }
-        
-        calculateWeeklySuccessRate(from: logs)
-        print("✅ 주간 습관 상태 업데이트 완료")
-    }
-    
-    // MARK: - Monthly Habit Status Update
-    func updateHabitCompletionStatusForMonthly(from logs: [HabitLogData]) {
-        print("🔍 월간 습관 로그 업데이트 시작: \(logs.count)개 항목")
-        
-        var habitStatusMap: [Int: (completed: Bool, name: String, icon: String)] = [:]
-        
-        for log in logs {
-            if let existingHabit = habitStatusMap[log.habitId] {
-                habitStatusMap[log.habitId] = (completed: log.completed, name: existingHabit.name, icon: existingHabit.icon)
-            } else {
-                habitStatusMap[log.habitId] = (completed: log.completed, name: log.name, icon: getIconForHabitName(log.name))
-            }
-            print("📝 월간 습관 \(log.habitId) (\(log.name)): \(log.completed ? "완료" : "미완료")")
-        }
-        
-        let sortedHabits = habitStatusMap.sorted { $0.key < $1.key }
-        actualHabits = sortedHabits.map { (habitId, habitData) in
-            return (id: habitId, name: habitData.name, icon: habitData.icon, completed: habitData.completed)
-        }
-        
-        calculateMonthlySuccessRate(from: logs)
-        print("✅ 월간 습관 상태 업데이트 완료")
-    }
     
     // MARK: - Success Rate Calculations
     func calculateDailySuccessRate(from logs: [HabitLogData]) {

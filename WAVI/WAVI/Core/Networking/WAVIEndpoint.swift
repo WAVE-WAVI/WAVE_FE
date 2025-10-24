@@ -312,6 +312,7 @@ struct ConsistencyIndex: Codable {
 struct HabitSuccessRate: Codable {
     let name: String
     let rate: Double
+    let icon: String
 }
 
 struct TopFailureReason: Codable {
