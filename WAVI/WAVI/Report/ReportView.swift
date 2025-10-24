@@ -232,23 +232,24 @@ struct ReportView: View {
             }
             
             // 탭뷰로 변경된 하단 섹션 (스크롤 가능)
-            ScrollView {
-                TabView(selection: $selectedTab) {
-                    // 하루 기록
+            TabView(selection: $selectedTab) {
+                // 하루 기록
+                ScrollView {
                     dailyReportView
-                        .tag(0)
-                    
-                    // 주간 기록
-                    weeklyReportView
-                        .tag(1)
-                    
-                    // 월간 기록
-                    monthlyReportView
-                        .tag(2)
                 }
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                .frame(minHeight: selectedTab == 1 ? 400 : 500)
+                .tag(0)
+                
+                // 주간 기록
+                ScrollView {
+                    weeklyReportView
+                }
+                .tag(1)
+                
+                // 월간 기록 - 스크롤 제한 없음
+                monthlyReportView
+                    .tag(2)
             }
+            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             .padding(.top, 20)
             
         }

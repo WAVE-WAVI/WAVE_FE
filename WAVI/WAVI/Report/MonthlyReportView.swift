@@ -33,19 +33,24 @@ struct MonthlyReportView: View {
             // 3페이지 스크롤 컨텐츠 (페이지 인디케이터 제거)
             TabView(selection: $currentPage) {
                 // 1페이지: 성공률 차트
-                page1View
-                    .tag(0)
+                ScrollView {
+                    page1View
+                }
+                .tag(0)
                 
                 // 2페이지: 패턴 분석
-                page2View
-                    .tag(1)
+                ScrollView {
+                    page2View
+                }
+                .tag(1)
                 
                 // 3페이지: 노력 지수 & 동기부여
-                page3View
-                    .tag(2)
+                ScrollView {
+                    page3View
+                }
+                .tag(2)
             }
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-            .frame(height: 600)
             .onChange(of: currentPage) { _, newPage in
                 monthlyCurrentPage = newPage
             }
@@ -70,8 +75,6 @@ struct MonthlyReportView: View {
     // MARK: - 1페이지: 성공률 차트 + 습관 성공률
     private var page1View: some View {
         VStack(spacing: 30) {
-            Spacer()
-            
             // 전체 성공률 차트
             ZStack {
                 // 배경 원
@@ -120,17 +123,14 @@ struct MonthlyReportView: View {
                     .lineLimit(nil)
             }
             .frame(maxWidth: .infinity)
-            
-            Spacer()
         }
         .padding(.horizontal, 20)
+        .padding(.vertical, 20)
     }
     
     // MARK: - 2페이지: 실패 요인 분석
     private var page2View: some View {
         VStack(spacing: 30) {
-            Spacer()
-            
             // 주요 원인
             VStack(spacing: 5) {
                 // 습관별 실패 요인
@@ -149,19 +149,14 @@ struct MonthlyReportView: View {
                     .foregroundColor(Color(red: 66/255, green: 129/255, blue: 182/255))
                 
             }
-            
-            
-            
-            Spacer()
         }
         .padding(.horizontal, 20)
+        .padding(.vertical, 20)
     }
     
     // MARK: - 3페이지: 패턴 & 노력 지수 & 동기부여
     private var page3View: some View {
         VStack(spacing: 30) {
-            Spacer()
-            
             // 전체 성공률 차트
             ZStack {
                 // 배경 원
@@ -255,10 +250,9 @@ struct MonthlyReportView: View {
             }
             .frame(maxWidth: .infinity)
             .multilineTextAlignment(.center)
-            
-            Spacer()
         }
         .padding(.horizontal, 20)
+        .padding(.vertical, 20)
     }
     
     
