@@ -23,8 +23,11 @@ struct SetPasswordView: View {
     private let signUpService = BackendSignUpService()
     
     var body: some View {
-        
-        VStack() {
+        ZStack {
+            Color(hex: "#F1EFF2")
+                .ignoresSafeArea()
+            
+            VStack() {
             HStack {
                 Button(action: {
                     dismiss()
@@ -99,6 +102,7 @@ struct SetPasswordView: View {
             }
             .padding(.horizontal, 24)
             .navigationBarHidden(true)
+            }
         }
     }
     

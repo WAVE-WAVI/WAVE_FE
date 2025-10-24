@@ -25,8 +25,11 @@ struct NicknameSelectionView: View {
     // private let userService = BackendUserService() // TODO: 구현 예정
     
     var body: some View {
-        
-        VStack() {
+        ZStack {
+            Color(hex: "#F1EFF2")
+                .ignoresSafeArea()
+            
+            VStack() {
             HStack {
                 Button(action: {dismiss() // 뒤로가기 액션
                     print("뒤로가기")
@@ -93,6 +96,7 @@ struct NicknameSelectionView: View {
             }
             .padding(.horizontal, 24)
             .navigationBarHidden(true)
+            }
         }
     }
     

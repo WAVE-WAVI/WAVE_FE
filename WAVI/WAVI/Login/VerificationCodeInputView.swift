@@ -23,7 +23,11 @@ struct VerificationCodeInputView: View {
     private let signUpService = BackendSignUpService()
     
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack {
+            Color(hex: "#F1EFF2")
+                .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
             // Custom Navigation Bar (이전 화면과 동일)
             HStack {
                 Button(action: { dismiss() }) {
@@ -126,12 +130,13 @@ struct VerificationCodeInputView: View {
                     .padding(.vertical, 16)
                     .background(
                         RoundedRectangle(cornerRadius: 40)
-                            .fill(isCodeValid ? Color.green100 : Color.black20)
+                            .fill(isCodeValid ? Color(hex: "#040415") : Color.black20)
                     )
             }
             .disabled(!isCodeValid || isVerifying)
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
+            }
         }
         .navigationBarHidden(true)
         .onAppear {

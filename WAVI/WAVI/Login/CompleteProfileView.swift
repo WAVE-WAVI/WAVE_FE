@@ -78,7 +78,11 @@ struct CompleteProfileView: View {
     }
     
     var body: some View {
-        VStack() {
+        ZStack {
+            Color(hex: "#F1EFF2")
+                .ignoresSafeArea()
+            
+            VStack() {
             HStack {
                 Button(action: {
                     dismiss()
@@ -156,6 +160,7 @@ struct CompleteProfileView: View {
             }
             .padding(.horizontal, 24)
             .navigationBarHidden(true)
+            }
         }
     }
     
