@@ -28,6 +28,30 @@ struct ProgressRingView: View {
         return remaining
     }
     
+    // 당일 목표가 있는지 확인 (오늘 요일에 해당하는 습관이 있는지)
+    var hasTodayGoals: Bool {
+        return !habits.isEmpty
+    }
+    
+    // 모든 목표를 달성했는지 확인 (목표는 있지만 남은 것이 없는 경우)
+    var allGoalsCompleted: Bool {
+        return hasTodayGoals && remainingGoalsCount == 0
+    }
+    
+    // 표시할 메시지 결정
+    var displayMessage: String {
+        if !hasTodayGoals {
+            // 당일 목표가 아예 없는 경우 - 메시지 표시 안함
+            return ""
+        } else if remainingGoalsCount > 0 {
+            // 목표가 있고 아직 달성할 것이 남은 경우
+            return "앞으로 달성할 목표가 \(remainingGoalsCount)개 남았어요!"
+        } else {
+            // 목표는 있지만 모두 달성한 경우
+            return "오늘의 목표를 모두 달성했어요!"
+        }
+    }
+    
     // 현재 중앙 카드의 primaryColor
     var currentCenterCardPrimaryColor: String {
         guard currentCenterIndex < habits.count else {
@@ -80,9 +104,7 @@ struct ProgressRingView: View {
                         .font(.system(size: 48, weight: .bold))
                         .foregroundColor(Color(hex: "#333333"))
                     
-                    Text(remainingGoalsCount > 0 
-                         ? "앞으로 달성할 목표가 \(remainingGoalsCount)개 남았어요!"
-                         : "오늘의 목표를 모두 달성했어요!")
+                    Text(displayMessage)
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(Color(hex: "#666666"))
                         .multilineTextAlignment(.center)

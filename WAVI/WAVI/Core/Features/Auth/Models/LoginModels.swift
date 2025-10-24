@@ -66,6 +66,7 @@ struct LoginResponse: Codable {
 struct APISignUpResponse: Codable {
     let status: Int
     let message: String
+    let data: String?
 }
 
 // MARK: - Network Error Response
