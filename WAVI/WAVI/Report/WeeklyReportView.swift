@@ -12,6 +12,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct WeeklyReportView: View {
     @Binding var selectedWeek: Int
@@ -21,6 +22,7 @@ struct WeeklyReportView: View {
     @State var overallSuccessRate: Double = 0.0
     @State var habitSuccessRates: [(String, Double)] = []
     @State var appliedRecommendations: Set<Int> = [] // 적용된 추천 ID들
+    @State private var cancellables = Set<AnyCancellable>()
     
     // ReportView에서 받은 데이터
     let reportOverallSuccessRate: Double
@@ -40,7 +42,7 @@ struct WeeklyReportView: View {
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(spacing: 16) {
                 // 주간 선택 (동적) - 가로 스크롤
                 ScrollViewReader { proxy in
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -120,15 +122,16 @@ struct WeeklyReportView: View {
     }
     
     private func getCurrentHabitName(for recommendation: ReportRecommendation) -> String {
-        // 추천된 습관 이름을 기반으로 현재 습관 이름을 추정
-        // 실제로는 서버에서 현재 습관 정보를 받아와야 함
-        return "현재 습관" // 임시로 설정
+        return recommendation.currentHabitName ?? "현재 습관"
     }
     
     private func getCurrentHabitSchedule(for recommendation: ReportRecommendation) -> String {
-        // 추천된 습관 스케줄을 기반으로 현재 습관 스케줄을 추정
-        // 실제로는 서버에서 현재 습관 정보를 받아와야 함
-        return "현재 스케줄" // 임시로 설정
+        if let startTime = recommendation.currentHabitStartTime,
+           let endTime = recommendation.currentHabitEndTime,
+           let dayOfWeek = recommendation.currentHabitDayOfWeek {
+            return formatScheduleWithDays(startTime, endTime, dayOfWeek)
+        }
+        return "현재 스케줄"
     }
     
     private func formatSchedule(_ startTime: String, _ endTime: String) -> String {
@@ -436,8 +439,39 @@ struct WeeklyReportView: View {
             appliedRecommendations.insert(recommendation.id)
             print("✅ 습관 변경 적용: \(recommendation.name)")
             
-            // TODO: 실제 습관 변경 API 호출
-            // habitService.updateHabit(recommendation)
+            // 실제 습관 변경 API 호출
+            do {
+                let habitService = NewHabitService()
+                let request = HabitRequest(
+                    name: recommendation.name,
+                    dayOfWeek: recommendation.dayOfWeek,
+                    icon: "🏃‍♂️",
+                    startTime: recommendation.startTime,
+                    endTime: recommendation.endTime
+                )
+                
+                habitService.updateHabit(id: "1", request: request)
+                    .receive(on: DispatchQueue.main)
+                    .sink(
+                        receiveCompletion: { completion in
+                            switch completion {
+                            case .failure(let error):
+                                print("❌ 습관 변경 실패: \(error)")
+                                // 실패 시 적용 상태 취소
+                                appliedRecommendations.remove(recommendation.id)
+                            case .finished:
+                                print("✅ 습관 변경 완료: \(recommendation.name)")
+                            }
+                        },
+                        receiveValue: { response in
+                            print("✅ 습관 변경 API 응답: \(response.message)")
+                        }
+                    )
+                    .store(in: &cancellables)
+            } catch {
+                print("❌ 습관 변경 요청 생성 실패: \(error)")
+                appliedRecommendations.remove(recommendation.id)
+            }
         }
     }
 }
@@ -459,8 +493,8 @@ struct WeeklyReportView_Previews: PreviewProvider {
                 HabitSuccessRate(name: "코딩 테스트 문제 풀기", rate: 71.0)
             ],
             recommendations: [
-                ReportRecommendation(id: 1, name: "300m 수영하기", startTime: "07:00:00", endTime: "07:30:00", dayOfWeek: [1, 3, 5]),
-                ReportRecommendation(id: 2, name: "코딩 테스트 문제 풀기", startTime: "20:00:00", endTime: "21:00:00", dayOfWeek: [1, 2, 3, 4, 5])
+                ReportRecommendation(id: 1, name: "300m 수영하기", startTime: "07:00:00", endTime: "07:30:00", dayOfWeek: [1, 3, 5], currentHabitName: "500m 수영하기", currentHabitStartTime: "07:00:00", currentHabitEndTime: "07:30:00", currentHabitDayOfWeek: [1, 3, 5]),
+                ReportRecommendation(id: 2, name: "코딩 테스트 문제 풀기", startTime: "20:00:00", endTime: "21:00:00", dayOfWeek: [1, 2, 3, 4, 5], currentHabitName: "알고리즘 공부", currentHabitStartTime: "20:00:00", currentHabitEndTime: "21:00:00", currentHabitDayOfWeek: [1, 2, 3, 4, 5])
             ]
         )
     }

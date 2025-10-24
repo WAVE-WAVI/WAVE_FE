@@ -1174,8 +1174,8 @@ struct ReportView: View {
             print("⚠️ 주간 추천 데이터 없음 - API에서 데이터를 받지 못함")
             print("   → 테스트용 더미 데이터 추가")
             weeklyRecommendations = [
-                ReportRecommendation(id: 1, name: "운동", startTime: "07:00", endTime: "08:00", dayOfWeek: [1, 2, 3, 4, 5]),
-                ReportRecommendation(id: 2, name: "독서", startTime: "20:00", endTime: "21:00", dayOfWeek: [1, 2, 3, 4, 5])
+                ReportRecommendation(id: 1, name: "운동", startTime: "07:00", endTime: "08:00", dayOfWeek: [1, 2, 3, 4, 5], currentHabitName: "현재 운동", currentHabitStartTime: "07:00", currentHabitEndTime: "08:00", currentHabitDayOfWeek: [1, 2, 3, 4, 5]),
+                ReportRecommendation(id: 2, name: "독서", startTime: "20:00", endTime: "21:00", dayOfWeek: [1, 2, 3, 4, 5], currentHabitName: "현재 독서", currentHabitStartTime: "20:00", currentHabitEndTime: "21:00", currentHabitDayOfWeek: [1, 2, 3, 4, 5])
             ]
         }
         
@@ -1564,6 +1564,10 @@ struct ReportView: View {
             icon = "✍️"
         } else if lowercasedName.contains("그림") || lowercasedName.contains("draw") {
             icon = "🎨"
+        } else if lowercasedName.contains("다이어리") || lowercasedName.contains("일기") {
+            icon = "📝"
+        } else if lowercasedName.contains("러닝") || lowercasedName.contains("달리기") || lowercasedName.contains("running") {
+            icon = "🏃"
         } else {
             icon = "⭐"
         }

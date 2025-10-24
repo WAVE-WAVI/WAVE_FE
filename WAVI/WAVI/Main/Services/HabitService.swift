@@ -51,6 +51,7 @@ class BackendHabitService: HabitService {
             return .failure(error)
         }
     }
+    
 }
 
 // MARK: - New Habit Service for AddingHabitsMainView and HabitsConfirmView

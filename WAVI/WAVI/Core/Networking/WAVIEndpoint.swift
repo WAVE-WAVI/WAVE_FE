@@ -326,4 +326,8 @@ struct ReportRecommendation: Codable {
     let startTime: String
     let endTime: String
     let dayOfWeek: [Int]
+    let currentHabitName: String?
+    let currentHabitStartTime: String?
+    let currentHabitEndTime: String?
+    let currentHabitDayOfWeek: [Int]?
 }
